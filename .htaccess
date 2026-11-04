@@ -1,0 +1,22 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block sensitive hidden files (.env, .git, etc.)
+    RewriteRule ^\.(.*) - [F,L]
+
+    # Block direct access to sensitive Laravel directories
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests|vendor)(/.*)?$ - [F,L]
+    RewriteRule ^storage/(framework|logs|app/private)(/.*)?$ - [F,L]
+
+    # Rewrite /storage/ to storage/app/public/ (prevent rewrite loop)
+    RewriteCond %{REQUEST_URI} !^/storage/app/public/
+    RewriteRule ^storage/(.*)$ storage/app/public/$1 [L]
+
+    # Leave existing public files accessible
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Route everything else to Laravel's public directory
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
